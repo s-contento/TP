@@ -1,0 +1,9 @@
+<launch>
+
+  <include file="$(find turtlebot3_gazebo)/launch/medium_wh.launch" />
+
+  <include file="$(find ar_marker_test)/launch/aruco.launch" />
+  
+  <include file="$(find turtlebot3_teleop)/launch/turtlebot3_teleop_key.launch" />
+
+</launch>
