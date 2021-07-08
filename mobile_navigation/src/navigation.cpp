@@ -46,6 +46,8 @@ NAVIGATION::NAVIGATION() {
     _human_mode = false;
     _fv = _rv = 0.0;
     _record_wp = false;
+
+    cout << "k1/k2/b : " << k[0] << "/" << k[1] << "/" << b << "\n";
 }
 
 
@@ -141,17 +143,21 @@ bool NAVIGATION::navigation( float x_r, float y_r, float x_r_d, float y_r_d ) {
 
     cmd.linear.x = cos(_curr_yaw)*u[0] + sin(_curr_yaw)*u[1];
     cmd.angular.z = (-sin(_curr_yaw)*u[0]/b + cos(_curr_yaw)*u[1]/b);
-    _cmd_vel_pub.publish( cmd );
+    
 
     double pos_e = sqrt ( pow( x_r - _B_p.x, 2) +  pow(y_r - _B_p.y, 2) ); //norm of the motion vector
 
-    if( pos_e < 0.2 ) {
-        
+    cout << "\nerror:"<< pos_e << "\n";
+
+    if( pos_e < 0.1 ) {
+        cout << "\ne < 0.1!\n";
         cmd.linear.x = 0.0;
         cmd.angular.z = 0.0;
         _cmd_vel_pub.publish( cmd );
         return true;
     }else{
+
+    _cmd_vel_pub.publish( cmd );
     return false;
     }
     
@@ -247,8 +253,8 @@ void NAVIGATION::plan_cb( nav_msgs::Path geom_path ){
 
         _wp_list.push_back( geom_path.poses[i].pose.position);
 
-        cout << "\nLISTA ["<<i<<"] x : "<< _wp_list[i].x <<"\n";
-        cout << "\nLISTA ["<<i<<"] y : "<< _wp_list[i].y <<"\n";
+        cout << "\nLISTA ["<<i<<"] x : "<< _wp_list[i].x <<" ("<<geom_path.poses[i].pose.position.x << ")\n";
+        cout << "\nLISTA ["<<i<<"] y : "<< _wp_list[i].y <<" ("<<geom_path.poses[i].pose.position.y << ")\n";
     }
     
     for(int i= 0; i< geom_path.poses.size()-1;i++){
@@ -259,6 +265,8 @@ void NAVIGATION::plan_cb( nav_msgs::Path geom_path ){
 
         v.x = 0.1*dx/distance;
         v.y = 0.1*dy/distance;
+        // v.x = dx;
+        // v.y = dy;
 
         _wp_vel_list.push_back(v);
 
@@ -331,7 +339,7 @@ void NAVIGATION::ctrl_loop() {
     while ( ros::ok() ) {
         while( _wp_index < _wp_list.size() ) {
             while ( !_path_obstacle && !navigation( _wp_list[_wp_index].x,  _wp_list[_wp_index].y,_wp_vel_list[_wp_index].x,  _wp_vel_list[_wp_index].y ) ) {
-                cout << "\ncmd : "<<cmd.linear.x;
+                // cout << "\ncmd : "<<cmd.linear.x;
                 r.sleep();  
             }
 
@@ -350,7 +358,7 @@ void NAVIGATION::ctrl_loop() {
 
                 cout << "\nINDEX"<<_wp_index;
         }
-        _wp_index = 0;
+        //_wp_index = 0;
 
         r.sleep();
     }
