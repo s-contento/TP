@@ -15,6 +15,9 @@ NAVIGATION::NAVIGATION() {
     _cmd_vel_pub = _nh.advertise<geometry_msgs::Twist>("/cmd_vel", 1);
 
     _test_pub = _nh.advertise<nav_msgs::Path>("/path", 1);
+    _result_pub = _nh.advertise<std_msgs::Int32>("/controller_result", 1);
+
+    // _service = nh.advertiseService("service", service_callback);
 
     if (_nh.hasParam("k1"))
     {
@@ -37,7 +40,7 @@ NAVIGATION::NAVIGATION() {
         _nh.getParam("b",b);
     }
     else{
-        b = 0.2;
+        b = 0.1;
     }
 
     _path_received = false;
@@ -46,6 +49,8 @@ NAVIGATION::NAVIGATION() {
     _human_mode = false;
     _fv = _rv = 0.0;
     _record_wp = false;
+
+    _finish = false;
 
     cout << "k1/k2/b : " << k[0] << "/" << k[1] << "/" << b << "\n";
 }
@@ -135,6 +140,7 @@ void NAVIGATION::laser_cb( std_msgs::Int32 laser ) {
 bool NAVIGATION::navigation( float x_r, float y_r, float x_r_d, float y_r_d ) {
 
     geometry_msgs::Twist cmd;
+    
 
     float u[2];
 
@@ -149,11 +155,13 @@ bool NAVIGATION::navigation( float x_r, float y_r, float x_r_d, float y_r_d ) {
 
     cout << "\nerror:"<< pos_e << "\n";
 
-    if( pos_e < 0.1 ) {
-        cout << "\ne < 0.1!\n";
+    if( pos_e < 0.2 ) {
+    
+        cout << "\ne < 0.2!\n";
         cmd.linear.x = 0.0;
         cmd.angular.z = 0.0;
         _cmd_vel_pub.publish( cmd );
+
         return true;
     }else{
 
@@ -241,20 +249,24 @@ void NAVIGATION::train_traj () {
 
 void NAVIGATION::plan_cb( nav_msgs::Path geom_path ){
     cout << "\nRECEIVED\n";
+    _finish = false;
+    
+    _wp_list.clear();
+    _wp_vel_list.clear();
 
     float dx = 0;
     float dy = 0;
     float distance = 0;
 
     geometry_msgs::Vector3 v;
+    std::cout << "\nInitial size of PATH :["<< _wp_list.size()<< "] VEL :["<< _wp_vel_list.size()<<"]\n";
 
-
-    for(int i = 1; i<geom_path.poses.size();i++){
+    for(int i = 0; i<geom_path.poses.size();i++){
 
         _wp_list.push_back( geom_path.poses[i].pose.position);
 
-        cout << "\nLISTA ["<<i<<"] x : "<< _wp_list[i].x <<" ("<<geom_path.poses[i].pose.position.x << ")\n";
-        cout << "\nLISTA ["<<i<<"] y : "<< _wp_list[i].y <<" ("<<geom_path.poses[i].pose.position.y << ")\n";
+        // cout << "\nLISTA ["<<i<<"] x : "<< _wp_list[i].x <<" ("<<geom_path.poses[i].pose.position.x << ")\n";
+        // cout << "\nLISTA ["<<i<<"] y : "<< _wp_list[i].y <<" ("<<geom_path.poses[i].pose.position.y << ")\n";
     }
     
     for(int i= 0; i< geom_path.poses.size()-1;i++){
@@ -263,16 +275,25 @@ void NAVIGATION::plan_cb( nav_msgs::Path geom_path ){
         dy = geom_path.poses[i+1].pose.position.y - geom_path.poses[i].pose.position.y;
         distance = sqrt ( pow( dx, 2) +  pow(dy, 2) ); //norm of the motion vector
 
+        // std::cout << "\n dx : "<<dx << " dy :" << dy << "distance : " << distance << "\n";
+
         v.x = 0.1*dx/distance;
         v.y = 0.1*dy/distance;
         // v.x = dx;
         // v.y = dy;
-
+        // cout << "\n v.x : "<<v.x << " v.y :" << v.y << "\n";
         _wp_vel_list.push_back(v);
-
-        cout << "\nVEL ["<<i<< "] x : "<< _wp_vel_list[i].x <<"\n";
-        cout << "\nVEL ["<<i<< "] y : "<< _wp_vel_list[i].y <<"\n";
+        // std::cout << "\nVEL ["<<i<< "] x : "<< _wp_vel_list[i].x <<"\n";
+        // std::cout << "\nVEL ["<<i<< "] y : "<< _wp_vel_list[i].y <<"\n";
+        
     }
+
+
+    for (int i = 0; i< _wp_vel_list.size(); i++){
+        std::cout << "\nVEL ["<<i<< "] x : "<< _wp_vel_list[i].x <<"\n";
+        std::cout << "\nVEL ["<<i<< "] y : "<< _wp_vel_list[i].y <<"\n";
+    }
+    std::cout << "\nsize of PATH :["<< _wp_list.size()<< "] VEL :["<< _wp_vel_list.size()<<"]\n";
 
     _path_received = true;
 }
@@ -285,11 +306,16 @@ void NAVIGATION::ctrl_loop() {
 
     while( !_path_received ) sleep(1);
 
+
     //control loop
     //obstacle detection
     //Switching on human control
 
     ros::Rate r(100);
+
+    std_msgs::Int32 res;
+
+    
 
     // geometry_msgs::Vector3 v;
     // geometry_msgs::Point p;
@@ -335,13 +361,39 @@ void NAVIGATION::ctrl_loop() {
     _wp_index = 0;
 
     geometry_msgs::Twist cmd;
-
+    std::cout << "\nPATH RECEIVED! _wp_index : "<< _wp_index<< "_wp_list.size : "<<_wp_list.size()<<"\n";
+    std::cout << "finished : " << _finish << "\n";
     while ( ros::ok() ) {
-        while( _wp_index < _wp_list.size() ) {
-            while ( !_path_obstacle && !navigation( _wp_list[_wp_index].x,  _wp_list[_wp_index].y,_wp_vel_list[_wp_index].x,  _wp_vel_list[_wp_index].y ) ) {
+        std::cout <<"\n ..>.<";
+
+        if((_wp_list.size() < 1) && !_finish){
+            std::cout << "\nPATH NOT FOUND\n";
+
+            _finish = true;
+
+            res.data = 1;
+            _result_pub.publish (res);
+        }
+
+        while( _wp_index < _wp_list.size() && !_finish ) {
+            cout << "\nINDEX"<<_wp_index;
+            while ( !_path_obstacle && !navigation( _wp_list[_wp_index+1].x,  _wp_list[_wp_index+1].y,_wp_vel_list[_wp_index].x,  _wp_vel_list[_wp_index].y ) ) {
                 // cout << "\ncmd : "<<cmd.linear.x;
                 r.sleep();  
+
+                // if(_reached){
+                //     _reached = false;
+                // }
             }
+
+            if(navigation( _wp_list[_wp_list.size()-1].x,  _wp_list[_wp_list.size()-1].y,_wp_vel_list[_wp_list.size()-1].x,  _wp_vel_list[_wp_list.size()-1].y )){
+                ROS_WARN("\n\n Goal Reached!\n");
+                _finish = true;
+                res.data = 0;
+                _result_pub.publish (res);
+            }
+
+            
 
             if( _path_obstacle ) {
                 ROS_WARN("Found obstacle on the path");
@@ -353,13 +405,21 @@ void NAVIGATION::ctrl_loop() {
                 train_traj();
 
             }
-            else 
+            else {
                 _wp_index ++;
+            }
+                
 
-                cout << "\nINDEX"<<_wp_index;
+                
         }
-        //_wp_index = 0;
 
+        // if(!_reached){
+            
+        //     _reached = true;
+
+        // }
+        std::cout <<"\n end loop";
+        _wp_index = 0;
         r.sleep();
     }
     

@@ -1,0 +1,6 @@
+string in
+std_msgs/Int32 in2
+std_msgs/Int32 in3
+---
+string out
+std_msgs/Int32[] out2

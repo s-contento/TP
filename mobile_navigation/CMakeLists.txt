@@ -8,13 +8,17 @@ project(mobile_navigation)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
+  message_generation
+  message_runtime
   geometry_msgs
   roscpp
   sensor_msgs
   std_msgs
   nav_msgs
+  aruco_msgs
+  tf
 )
-
+	
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
 
@@ -56,11 +60,12 @@ find_package(catkin REQUIRED COMPONENTS
 # )
 
 ## Generate services in the 'srv' folder
-# add_service_files(
-#   FILES
-#   Service1.srv
-#   Service2.srv
-# )
+add_service_files(
+  FILES
+  service.srv
+  #Service1.srv
+  #Service2.srv
+)
 
 ## Generate actions in the 'action' folder
 # add_action_files(
@@ -70,10 +75,10 @@ find_package(catkin REQUIRED COMPONENTS
 # )
 
 ## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   geometry_msgs#   sensor_msgs#   std_msgs
-# )
+generate_messages(
+  DEPENDENCIES
+  std_msgs
+)
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -137,6 +142,19 @@ include_directories(
 ## The recommended prefix ensures that target names across packages don't collide
 add_executable( mobile_navigation src/navigation.cpp)
 target_link_libraries(mobile_navigation  ${catkin_LIBRARIES} )
+
+#add_executable( positioning_routine src/positioning_routine.cpp)
+#target_link_libraries(positioning_routine  ${catkin_LIBRARIES} )
+
+add_executable( service_client src/service_client.cpp)
+target_link_libraries(service_client  ${catkin_LIBRARIES} )
+
+add_executable(service_server src/service_server.cpp)
+target_link_libraries(service_server ${catkin_LIBRARIES})
+
+#add_executable(service_client src/service_client.cpp)
+#target_link_libraries(service_client ${catkin_LIBRARIES})
+
 
 #############
 ## Install ##

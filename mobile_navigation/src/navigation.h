@@ -23,8 +23,12 @@ class NAVIGATION {
         void laser_cb( std_msgs::Int32 laser );
         void plan_cb( nav_msgs::Path geom_path);
 
+        // bool service_callback( ros_service::service::Request &req, ros_service::service::Response &res);
+
 
         bool navigation( float x, float y , float v_x, float v_y);
+
+        
         void human_input();
         void train_traj();
     private:
@@ -33,14 +37,18 @@ class NAVIGATION {
         geometry_msgs::Point _curr_p;
         double               _curr_yaw;
 
-
+        //Publishers and Subscribers
         ros::Subscriber _odom_sub; 
         ros::Subscriber _lidar_sub; 
         ros::Subscriber _planner_sub;
 
         ros::Publisher  _cmd_vel_pub;   
 
-        ros::Publisher _test_pub;     
+        ros::Publisher _test_pub;    
+        ros::Publisher _result_pub; 
+
+        //Service for AR positioning routine
+        // ros::ServiceServer _service;
 
         //Control variables
         float b;                        //distance between the contact point of the wheel with the ground and the point B on the sagittal axis
@@ -61,6 +69,8 @@ class NAVIGATION {
         double _fv;
         double _rv;
         int _wp_index;
+
+        bool _finish;
 
         nav_msgs::Path path;
         vector< geometry_msgs::Point > _wp_list;
