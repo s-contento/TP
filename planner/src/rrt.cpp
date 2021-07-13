@@ -61,7 +61,7 @@ RRT::RRT(ros::NodeHandle &nh, RRT_type rrt_Type) : nh_(nh), gen((std::random_dev
 
     // ROS subscribers
     // create subscribers as you need
-    goal_sub_ = nh_.subscribe("/goal", 1, &RRT::goal_callback, this);
+    goal_sub_ = nh_.subscribe("/goals", 1, &RRT::goal_callback, this);
 
     map_sub_ = nh_.subscribe("/map", 1, &RRT::map_callback, this);
     pf_sub_ = nh_.subscribe(pose_topic, 10, &RRT::pf_callback, this);
@@ -208,7 +208,7 @@ void RRT::goal_callback(geometry_msgs::Pose goal) {
     y_goal = goal.position.y;
 
     x_limit_top = 10;
-    x_limit_bot = 0;
+    x_limit_bot = -1;
     y_limit_left = -6;
     y_limit_right = 6;
 
@@ -240,7 +240,6 @@ void RRT::goal_callback(geometry_msgs::Pose goal) {
     start.is_root = true;
     tree.push_back(start);
 
-
 //First point of the path is the current position
     // p.pose.position.x = start.x;
     // p.pose.position.y = start.y;
@@ -265,25 +264,25 @@ void RRT::goal_callback(geometry_msgs::Pose goal) {
         new_node.parent = nearest_point;                            // set the parent of the new point
         if (!check_collision(tree[nearest_point], new_node)) {      // collision checking for connecting the new point to the tree
             // if algorithm RRT* star is chosen, the block in the if statement is performed
-            if (rrt_type == RRT_type::RRT_star) {
-                std::vector<int> near_set = near(tree, new_node);  // set of points in the neighborhood of the new point
-                // find the points in the neighborhood through which minimum cost can be obtained to reach the new point
-                double min_cost = cost(tree, tree[nearest_point]) + line_cost(new_node, tree[nearest_point]);
-                for (unsigned int j = 0; j < near_set.size(); j++) {
-                    if ((!check_collision(tree[near_set[j]], new_node)) && (cost(tree, tree[near_set[j]]) + line_cost(new_node, tree[near_set[j]]) < min_cost)) {
-                        new_node.parent = near_set[j];
-                        min_cost = cost(tree, tree[near_set[j]]) + line_cost(new_node, tree[near_set[j]]);
-                    }
-                }
-                // rewire the tree to get lower cost for other points in the neighborhood
-                new_node.cost = min_cost;
-                for (unsigned int j = 0; j < near_set.size(); j++) {
-                    if ((!check_collision(tree[near_set[j]], new_node)) && (min_cost + line_cost(new_node, tree[near_set[j]]) < cost(tree, tree[near_set[j]]))) {
-                        tree[near_set[j]].parent = tree.size();
-                        tree[near_set[j]].cost = min_cost + line_cost(new_node, tree[near_set[j]]);
-                    }
-                }
-            }
+            // if (rrt_type == RRT_type::RRT_star) {
+            //     std::vector<int> near_set = near(tree, new_node);  // set of points in the neighborhood of the new point
+            //     // find the points in the neighborhood through which minimum cost can be obtained to reach the new point
+            //     double min_cost = cost(tree, tree[nearest_point]) + line_cost(new_node, tree[nearest_point]);
+            //     for (unsigned int j = 0; j < near_set.size(); j++) {
+            //         if ((!check_collision(tree[near_set[j]], new_node)) && (cost(tree, tree[near_set[j]]) + line_cost(new_node, tree[near_set[j]]) < min_cost)) {
+            //             new_node.parent = near_set[j];
+            //             min_cost = cost(tree, tree[near_set[j]]) + line_cost(new_node, tree[near_set[j]]);
+            //         }
+            //     }
+            //     // rewire the tree to get lower cost for other points in the neighborhood
+            //     new_node.cost = min_cost;
+            //     for (unsigned int j = 0; j < near_set.size(); j++) {
+            //         if ((!check_collision(tree[near_set[j]], new_node)) && (min_cost + line_cost(new_node, tree[near_set[j]]) < cost(tree, tree[near_set[j]]))) {
+            //             tree[near_set[j]].parent = tree.size();
+            //             tree[near_set[j]].cost = min_cost + line_cost(new_node, tree[near_set[j]]);
+            //         }
+            //     }
+            // }
 
             tree.push_back(new_node);  // add the new point to the tree
             // visualize the new point in the rviz
@@ -307,7 +306,6 @@ void RRT::goal_callback(geometry_msgs::Pose goal) {
         p.pose.position.y = paths[paths.size() - 1 - i].y;
         path.poses.push_back( p );
 
-        // std::cout << "\nGENERATED PATH, POINT ["<<i << "] X :"<< p.pose.position.x<<"\n";
     }
 
 
@@ -324,6 +322,7 @@ void RRT::goal_callback(geometry_msgs::Pose goal) {
     p.pose.position.y = y_goal;
     path.poses.push_back( p );
 
+    std::cout << "\nsize of PATH :["<< path.poses.size()<< "] TREE [ :"<< tree.size()<<"] PATHS :["<< paths.size()<<"]\n";
     //DEBUG
     for (int i = 0; i< path.poses.size();i++){
         std::cout << "\nGENERATED PATH, POINT ["<<i << "] X :"<< path.poses[i].pose.position.x<<"\n";

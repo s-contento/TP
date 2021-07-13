@@ -10,7 +10,7 @@ int main(int argc, char** argv) {
     ros::init(argc, argv, "rrt");
     ros::NodeHandle nh;
     // RRT rrt(nh, RRT_type::RRT_star);  // specify here to run RRT or RRT*
-    RRT rrt(nh, RRT_type::RRT_star);
+    RRT rrt(nh, RRT_type::RRT_base);
     ros::spin();
     return 0;
 }
