@@ -37,12 +37,6 @@
         </constraints>
       </ode>
     </physics>
-    
-    
-    <!-- A ground plane -->
-    <include>
-      <uri>model://TP_Scene3</uri>
-    </include>
   </world>
 
 </sdf>
