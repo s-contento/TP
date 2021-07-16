@@ -110,9 +110,9 @@ generate_messages(
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#  INCLUDE_DIRS include
-#  LIBRARIES mobile_navigation
-#  CATKIN_DEPENDS geometry_msgs roscpp sensor_msgs std_msgs
+  INCLUDE_DIRS include
+  LIBRARIES navigation routine
+  CATKIN_DEPENDS geometry_msgs nav_msgs roscpp rospy sensor_msgs std_msgs visualization_msgs tf aruco_msgs boost
 #  DEPENDS system_lib
 )
 
@@ -123,13 +123,13 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
-# include
+  include
   ${catkin_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/mobile_navigation.cpp
+#   include/routine/positioning_routine.cpp
 # )
 
 ## Add cmake target dependencies of the library
@@ -143,17 +143,15 @@ include_directories(
 add_executable( mobile_navigation src/navigation.cpp)
 target_link_libraries(mobile_navigation  ${catkin_LIBRARIES} )
 
-#add_executable( positioning_routine src/positioning_routine.cpp)
-#target_link_libraries(positioning_routine  ${catkin_LIBRARIES} )
+add_executable( positioning_routine src/positioning_routine.cpp)
+target_link_libraries(positioning_routine  ${catkin_LIBRARIES} )
 
 add_executable( service_client src/service_client.cpp)
 target_link_libraries(service_client  ${catkin_LIBRARIES} )
 
-add_executable(service_server src/service_server.cpp)
-target_link_libraries(service_server ${catkin_LIBRARIES})
+#add_executable(service_server src/service_server.cpp)
+#target_link_libraries(service_server ${catkin_LIBRARIES})
 
-#add_executable(service_client src/service_client.cpp)
-#target_link_libraries(service_client ${catkin_LIBRARIES})
 
 
 #############

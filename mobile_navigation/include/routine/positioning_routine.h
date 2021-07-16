@@ -1,4 +1,5 @@
 #include "ros/ros.h"
+#include"ros_service/service.h"
 
 //---Input
 #include "geometry_msgs/Twist.h" //<-- to control the robot in velocity
@@ -43,6 +44,8 @@ class POS_ROUTINE {
         //callback to retrieve the aruco pose
         void vision_cb( aruco_msgs::MarkerArray markers);
 
+        bool service_callback(ros_service::service::Request &req, ros_service::service::Response &res);
+
     
     private:
 
@@ -66,7 +69,12 @@ class POS_ROUTINE {
         ros::Subscriber position_error;
 
         //publish the desired velocity
-        ros::Publisher  _cmd_vel_pub;   
+        ros::Publisher  _cmd_vel_pub;  
+
+        ros::ServiceServer _service; 
+
+        ros_service::service::Request request;
+        ros_service::service::Response response;
 
         //Service for AR positioning routine
         // ros::ServiceServer _service;

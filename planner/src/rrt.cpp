@@ -253,7 +253,7 @@ void RRT::goal_callback(geometry_msgs::Pose goal) {
 
     // vector to store the final path
     std::vector<Node> paths;
-    std::vector<geometry_msgs::Point> geom_path;        //delete
+    // std::vector<geometry_msgs::Point> geom_path;        //delete
     
     int ita = 0;
     // each loop creates a new sample in the space, generate up to MAX_ITERATION samples due to on-board computation constraints
@@ -263,6 +263,7 @@ void RRT::goal_callback(geometry_msgs::Pose goal) {
         Node new_node = steer(tree[nearest_point], sampled_point);  // steer the tree toward the sampled point, get new point
         new_node.parent = nearest_point;                            // set the parent of the new point
         if (!check_collision(tree[nearest_point], new_node)) {      // collision checking for connecting the new point to the tree
+
             // if algorithm RRT* star is chosen, the block in the if statement is performed
             // if (rrt_type == RRT_type::RRT_star) {
             //     std::vector<int> near_set = near(tree, new_node);  // set of points in the neighborhood of the new point
@@ -284,7 +285,9 @@ void RRT::goal_callback(geometry_msgs::Pose goal) {
             //     }
             // }
 
-            tree.push_back(new_node);  // add the new point to the tree
+            tree.push_back(new_node);                                       // add the new point to the tree
+            tree[nearest_point].adj_list_ind.push_back(tree.size()-1);      //add the new point to the adjacency list of its nearest point
+
             // visualize the new point in the rviz
             points.x = new_node.x;
             points.y = new_node.y;
@@ -673,6 +676,45 @@ bool RRT::is_goal(Node &latest_added_node, double goal_x, double goal_y) {
 }
 
 std::vector<Node> RRT::find_path(std::vector<Node> &tree, Node &latest_added_node) {
+    // This method traverses the tree from the node that has been determined
+    // as goal
+    // Args:
+    //   latest_added_node (Node): latest addition to the tree that has been
+    //      determined to be close enough to the goal
+    // Returns:
+    //   path (std::vector<Node>): the vector that represents the order of
+    //      of the nodes traversed as the found path
+
+    std::vector<Node> found_path;
+    geometry_msgs::Point points;
+    marker_4.points.clear();
+    points.x = x_goal;
+    points.y = y_goal;
+    points.z = 0.0;
+    marker_4.points.push_back(points);
+    points.x = latest_added_node.x;
+    points.y = latest_added_node.y;
+    points.z = 0.0;
+    marker_4.points.push_back(points);
+    found_path.push_back(latest_added_node);
+    Node next_node = tree[latest_added_node.parent];
+    while (!next_node.is_root) {
+        found_path.push_back(next_node);
+        next_node = tree[next_node.parent];
+        points.x = next_node.x;
+        points.y = next_node.y;
+        points.z = 0.0;
+        marker_4.points.push_back(points);
+    }
+    found_path.push_back(tree[0]);
+    points.x = tree[0].x;
+    points.y = tree[0].y;
+    points.z = 0.0;
+    marker_4.points.push_back(points);
+    return found_path;
+}
+
+std::vector<Node> RRT::find_path_A_star(std::vector<Node> &tree, Node &latest_added_node) {
     // This method traverses the tree from the node that has been determined
     // as goal
     // Args:

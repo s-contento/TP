@@ -44,9 +44,14 @@ enum RRT_type {
 // You can choose to use this or not
 typedef struct Node {
     double x, y;
-    double cost;          // only used for RRT*
+    
     unsigned int parent;  // index of parent node in the tree vector
     bool is_root = false;
+
+    //A star
+    double cost;          // cost function
+    std::vector<int> adj_list_ind;  //indices of the adjacent Nodes in the tree
+    
 } Node;
 
 typedef struct Edge {
@@ -161,6 +166,8 @@ private:
     bool check_collision(Node &nearest_node, Node &new_node);
     bool is_goal(Node &latest_added_node, double goal_x, double goal_y);
     std::vector<Node> find_path(std::vector<Node> &tree, Node &latest_added_node);
+    std::vector<Node> find_path_A_star(std::vector<Node> &tree, Node &latest_added_node);
+
     // RRT* methods
     double cost(std::vector<Node> &tree, Node &node);
     double line_cost(Node &n1, Node &n2);

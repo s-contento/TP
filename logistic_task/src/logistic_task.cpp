@@ -7,6 +7,9 @@
 
 #include "boost/thread.hpp"
 
+#include"ros_service/service.h"
+
+
 
 
 //#include"adder/addendi.h"       //custo msgs
@@ -53,6 +56,7 @@ class ROS_SUB {
 
     private:
         ros::NodeHandle _nh;
+
         ros::Subscriber _topic_sub;
         ros::Publisher _topic_pub;
 
@@ -60,6 +64,8 @@ class ROS_SUB {
         ros::Subscriber _clk_p;
 
         ros::Publisher _goal_pub;
+
+        ros::ServiceClient _client;
 
         //take the position of the AR markers,
         //when position is obtained located = true
@@ -131,14 +137,19 @@ ROS_SUB::ROS_SUB() {
 
     manual = false;
 
+    _client = _nh.serviceClient<ros_service::service>("service");
+
     _topic_pub = _nh.advertise<std_msgs::Int32>("/recognized_ID",10);
     _goal_pub = _nh.advertise<geometry_msgs::Pose>("/goals",0);
 
-    ros::Rate rate(10);
+    
     _topic_sub = _nh.subscribe("/aruco_marker_publisher/markers", 1, &ROS_SUB::topic_cb, this);
     _controller_result = _nh.subscribe("/controller_result", 1, &ROS_SUB::result_cb, this);
 
     _clk_p = _nh.subscribe("/clicked_point", 0, &ROS_SUB::clk_p_cb, this);
+
+    // ros::Rate rate(10);
+
 }
 
 void ROS_SUB::set_pos( geometry_msgs::Point p, int index){
@@ -166,7 +177,6 @@ void ROS_SUB::clk_p_cb( geometry_msgs::PointStamped clk_p ){
 }
 
 void ROS_SUB::topic_cb( aruco_msgs::MarkerArray markers){
-
     if (state == 2){
         if((markers.markers[0].pose.pose.position.z <= 2) && (markers.markers[0].pose.pose.position.x <= 2) && (markers.markers[0].pose.pose.position.y <= 2))
         {
@@ -205,7 +215,8 @@ void ROS_SUB::result_cb( std_msgs::Int32 result){
     // if(!result_arr){
     if (state == 1){
         if (result.data == 0){
-            state = 2;
+
+            state = 8;
             changed = true;
             cout << "SUCCEEDED!\n";
         }
@@ -324,10 +335,11 @@ void ROS_SUB::take_input(){
 
 
 void ROS_SUB::task_loop() {
-
     geometry_msgs::Pose _w_goal;
+    ros_service::service srv;
+    //         ros::Rate rate(10);
 
-
+    // rate.sleep();
     while(ros::ok() && !manual){
 
         switch(state){
@@ -376,12 +388,13 @@ void ROS_SUB::task_loop() {
             case 2:
 
                 if(changed){
-                std::cout << "\n\n SEARCHING THE MARKER TO READ ...\n";
+                std::cout << "\n\n Reading ID ...\n";
                 changed = false;
                 }
 
 
                 break;
+
 
             case 3:
 
@@ -469,6 +482,34 @@ void ROS_SUB::task_loop() {
 
                 break;
 
+            // case 8:
+            //     if(changed){
+            //         std::cout << "\n\n Adjusting routine\n";
+            //         changed = false;
+            //     }
+            //     break;
+            case 8:
+
+                std::cout << "\n\n SEARCHING THE MARKER TO READ ...\n";
+                
+
+                cout << "\n\nCalling  ... ]\n\r";
+                if(_client.call(srv)){
+                    cout << "\n\nCalling service ... ]\n\r";
+                    cout << "\n\nFrom Client: ["<< srv.request.in << "]\n\r";
+                    cout << "\nReceived: " << srv.response.out<<endl;
+                }
+                else{
+                    ROS_ERROR("Failed to call Service");
+                }
+                cout << "\n\nSERVER RESPONSE ARRIVED!!!\n\r";
+
+                state = 2;
+                changed = true;
+                
+
+
+                break;
 
             case 9:
 

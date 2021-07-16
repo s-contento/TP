@@ -10,7 +10,7 @@ bool service_callback( ros_service::service::Request &req, ros_service::service:
 
     POS_ROUTINE p_r;
     p_r.run();
-    
+    std::cout <<"\nafter run\n";
     return true;
 }
 

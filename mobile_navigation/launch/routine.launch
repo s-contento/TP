@@ -4,8 +4,10 @@
 
   <include file="$(find ar_marker_test)/launch/aruco.launch" />
   
-  <include file="$(find turtlebot3_teleop)/launch/turtlebot3_teleop_key.launch" />
+  <!--<include file="$(find turtlebot3_teleop)/launch/turtlebot3_teleop_key.launch" />-->
   
+  <node name="service_server" pkg="mobile_navigation" type="service_server"/>
+  <node name="service_client" pkg="mobile_navigation" type="service_client" output="screen" launch-prefix="xterm -e" />
 
 
   <!-- move_base 

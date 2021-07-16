@@ -1,4 +1,5 @@
-#include "positioning_routine.h"
+#include "routine/positioning_routine.h"
+
 
 using namespace std;
 
@@ -11,14 +12,15 @@ POS_ROUTINE::POS_ROUTINE() {
     
 
     _cmd_vel_pub = _nh.advertise<geometry_msgs::Twist>("/cmd_vel", 0);
-    position_error = _nh.subscribe("/aruco_marker_publisher/markers", 1, &POS_ROUTINE::vision_cb, this);
+    position_error = _nh.subscribe("/aruco_marker_publisher/markers", 0, &POS_ROUTINE::vision_cb, this);
 
+    _service = _nh.advertiseService("service", &POS_ROUTINE::service_callback,this);
     // _service = nh.advertiseService("service", service_callback);
     roll = 0.0;
     pitch = 0.0;
     yaw = 0.0;
 
-    current_id = 26;
+    current_id = 1;
     aligned_pitch = 0;
 
 
@@ -256,8 +258,17 @@ bool POS_ROUTINE::rotating() {
 
 
 void POS_ROUTINE::ctrl_loop() {
+    _finish = false;
 
     std::cout << "\nWaiting first AR lecture!\n";
+    geometry_msgs::Twist cmd;
+
+    cmd.linear.x = 0.0;
+        // cmd.linear.z = 0.0;
+
+    cmd.angular.z = -0.20;
+
+    _cmd_vel_pub.publish(cmd);
     while( !_first_lecture ) sleep(1);
 
     // while( !_path_received ) sleep(1);
@@ -267,7 +278,6 @@ void POS_ROUTINE::ctrl_loop() {
     std_msgs::Int32 res;
 
 
-    geometry_msgs::Twist cmd;
 
     std::cout << "\nStarting adjusting routine... \n";
 
@@ -297,7 +307,7 @@ void POS_ROUTINE::ctrl_loop() {
         }
 
         if (_finish == true){
-
+            //_finish = false;
             break;
         }
 
@@ -306,11 +316,11 @@ void POS_ROUTINE::ctrl_loop() {
         //     std::cout <<"\nGo\n";
 
         // }
-
+        ros::spinOnce();
         r.sleep();
     }
-    
-
+    std::cout <<"\nbreaked\n";
+    response.out.data = 5;
 
 }
 
@@ -318,19 +328,51 @@ void POS_ROUTINE::run() {
 
     
     boost::thread ctrl_loop_t( &POS_ROUTINE::ctrl_loop, this );
-    ros::spin();
-    //---
+    // ros::spin();
+    // ctrl_loop_t.join();
+    std::cout <<"\nafter spin\n";
 }
 
+bool POS_ROUTINE::service_callback( ros_service::service::Request &req, ros_service::service::Response &res){
+    std::cout <<"\nbefore run\n";
+    
+    
 
+    run();
+    //ctrl_loop();
+    std::cout <<"\nafter run\n";
+
+    while( !_finish ){
+        sleep(1);
+        ros::spinOnce();
+    } 
+    // req = request;
+    res.out.data = 1;
+
+    return true;
+}
 
 // int main( int argc, char** argv ) {
 
 //     ros::init( argc, argv, "positioning_routine_node");
 
 //     POS_ROUTINE p_r;
-//     p_r.run();
+//     // p_r.run();
 
 
 //     return 0;
 // }
+int main(int argc, char **argv){
+
+    ros::init( argc, argv, "positioning_routine_node");
+
+    // ros::NodeHandle nh;
+    // ros::ServiceServer _service = nh.advertiseService("service", service_callback);
+    POS_ROUTINE p_r;
+//     // p_r.run();
+    ROS_INFO( "Ready to receive from client.");
+
+    ros::spin();
+
+    return 0;
+}
