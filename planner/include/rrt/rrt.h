@@ -1,10 +1,3 @@
-// RRT and RRT star implementation
-// Author: Lejun Jiang, Hongrui Zheng
-
-// This file contains the class definition of tree nodes and RRT
-// Reference: https://arxiv.org/pdf/1105.1186.pdf
-
-// ros
 #include <ackermann_msgs/AckermannDriveStamped.h>
 #include <geometry_msgs/Point.h>
 #include <geometry_msgs/PointStamped.h>
@@ -32,6 +25,7 @@
 #include <random>
 #include <string>
 #include <vector>
+#include <queue>
 
 // enum type for the switch between RRT and RRT*
 enum RRT_type {
@@ -49,7 +43,9 @@ typedef struct Node {
     bool is_root = false;
 
     //A star
-    double cost;          // cost function
+    double cost;
+    double cost_f;
+    double cost_g;          // cost function
     std::vector<int> adj_list_ind;  //indices of the adjacent Nodes in the tree
     
 } Node;

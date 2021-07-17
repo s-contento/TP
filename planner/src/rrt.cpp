@@ -15,6 +15,15 @@
 #define ETA 0.60
 #define MAX_ITERATION 10000
 
+// std::vector<int> queue2vector(std::priority_queue<int>& q){  
+//   std::vector<int> v;
+//   while(!q.empty()) {
+//     v.push_back(q.top());
+//     q.pop();
+//   }
+//   return v;
+// }
+
 // convert global frame to grid frame
 // grid size: 0.05m * 0.05m
 std::vector<unsigned int> convert_frame(double x_global, double y_global, double x_off = -10.00, double y_off = -10.00) {
@@ -261,7 +270,7 @@ void RRT::goal_callback(geometry_msgs::Pose goal) {
         std::vector<double> sampled_point = sample();               // sample the free space
         unsigned int nearest_point = nearest(tree, sampled_point);  // get the tree's nearest point
         Node new_node = steer(tree[nearest_point], sampled_point);  // steer the tree toward the sampled point, get new point
-        new_node.parent = nearest_point;                            // set the parent of the new point
+        //new_node.parent = nearest_point;                            // set the parent of the new point
         if (!check_collision(tree[nearest_point], new_node)) {      // collision checking for connecting the new point to the tree
 
             // if algorithm RRT* star is chosen, the block in the if statement is performed
@@ -294,7 +303,7 @@ void RRT::goal_callback(geometry_msgs::Pose goal) {
             points.z = 0.0;
             marker.points.push_back(points);
             if (is_goal(new_node, x_goal, y_goal)) {  // check if the goal point is reached
-                paths = find_path(tree, new_node);    // return the generated path
+                paths = find_path_A_star(tree, new_node);    // return the generated path
                 break;
             }
         }
@@ -639,6 +648,107 @@ std::vector<Node> RRT::find_path_A_star(std::vector<Node> &tree, Node &latest_ad
     //      of the nodes traversed as the found path
 
     std::vector<Node> found_path;
+    std::vector<int> open_list_indices;
+
+    bool found = false;
+
+    int q_s_index = 0;
+    int q_g_index = tree.size()-1;
+    int q_best_index = 0;
+
+    float h;
+
+    for(int i = 0; i< tree.size();i++){
+        tree[i].cost_g = 0;
+        tree[i].cost_f = 0;
+
+        tree[i].parent = 0;
+    }
+
+    open_list_indices.push_back(q_s_index);
+    // found_path.push_back(tree[q_s_index]);
+
+    std::cout << "\n\nA*\n";
+
+    while((open_list_indices.size()>0)&&(!found)){
+
+        //Find and extract Nbest from open
+        //if open is ordered for growing costs, q_best is the last element of the vector
+        q_best_index = open_list_indices.back();
+        open_list_indices.pop_back();
+
+        std::cout << "\n\nq_best_index\n";
+
+        if(q_best_index == q_g_index){
+            found = true;
+            std::cout << "\n\nFOUND\n";
+
+        }
+        else{
+
+            for(int i=0; i< tree[q_best_index].adj_list_ind.size();i++){
+                int j = tree[q_best_index].adj_list_ind[i];
+
+                if(tree[j].cost_g == 0){
+                    tree[j].cost_g = tree[q_best_index].cost_g + line_cost(tree[q_best_index],tree[j]);
+
+                    tree[j].parent = q_best_index;
+                    // found_path.push_back(tree[tree[j]]);        //Add j to T with a pointer to q_best
+
+                    open_list_indices.push_back(j);
+
+                    h = line_cost(tree[q_g_index],tree[j]);
+
+                    tree[j].cost_f = tree[j].cost_g + h;
+                }
+                else if (tree[q_best_index].cost_g + line_cost(tree[q_best_index],tree[j]) < tree[j].cost_g){
+
+                    tree[j].parent = q_best_index;
+                    tree[j].cost_g = tree[q_best_index].cost_g + line_cost(tree[q_best_index],tree[j]);
+                
+                    bool is_in = false;
+
+                    for (int k = 0; i< open_list_indices.size(); k++){
+                        if(open_list_indices[k] == j){
+                            is_in = true;
+                        }
+                    }
+
+                    if(is_in){
+                        bool added = false;
+
+                        for(int l = 0; l<open_list_indices.size();l++){
+
+                            if( (tree[open_list_indices[l]].cost < tree[j].cost) && !added){
+                                open_list_indices.insert(open_list_indices.begin()+l,j);
+                                added = true;
+                                break;
+                            }
+
+                        }
+                        // std::priority_queue<int> q;
+                        // for(int n : open_list_indices)    
+                        // q.push(n);
+                        // q.push(j);
+                        // open_list_indices = queue2vector(q);
+
+
+                    }
+                    else{
+                        h = line_cost(tree[q_g_index],tree[j]);
+
+                        tree[j].cost_f = tree[j].cost_g + h;
+                    }
+
+                }
+            }
+
+        }
+
+
+    }
+    std::cout << "\n\nout of loop\n";
+
     geometry_msgs::Point points;
     marker_4.points.clear();
     points.x = x_goal;
@@ -649,8 +759,13 @@ std::vector<Node> RRT::find_path_A_star(std::vector<Node> &tree, Node &latest_ad
     points.y = latest_added_node.y;
     points.z = 0.0;
     marker_4.points.push_back(points);
-    found_path.push_back(latest_added_node);
-    Node next_node = tree[latest_added_node.parent];
+    // found_path.push_back(latest_added_node);
+    // Node next_node = tree[latest_added_node.parent];
+    found_path.push_back(tree[q_g_index]);
+    Node next_node = tree[tree[q_g_index].parent];
+
+    std::cout << "\n\first parent x,y"<< tree[tree[q_g_index].parent].x<< "  " << tree[tree[q_g_index].parent].y<<"\n\n";
+
     while (!next_node.is_root) {
         found_path.push_back(next_node);
         next_node = tree[next_node.parent];
