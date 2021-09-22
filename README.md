@@ -1,2 +1,60 @@
-# TP
-ROBOTICS LAB (RL) &amp; FIELD AND SERVICE ROBOTICS (FSR) TECHNICAL PROJECT
+# TECHNICAL PROJECT - Project 1
+
+This repository contains the implementation of the technical projects for the courses of Robotics Lab (RL) and Field and Service Robotics (FSR) for the academic year 2021.
+
+The assigned [project 1](https://prisma.dieti.unina.it/images/Courses/FSR/FSR-RL-TP-Assignments.pdf) required to develop a control system for a wheeled mobile robot used in a logistic environment.
+
+## Brief Packages Description
+
+- **turtlebot3** : contains the packages used for the robot description (URDF) together with other packages that implements SLAM (gmapping), localization (amcl) and the joystick simulation (teleop).
+- **turtlebot3_simulations**: contains the stuff needed for the simulation of both the robot and the environment in gazebo.
+- **ar_marker_test** and **aruco_ros** : are used to work with Aruco AR Marker. 
+In the first phase it's used to locate the AR Markers in the map.
+In the second phase it's used to read the AR Markers ID.
+- **planner** : implementation of RRT with A*.
+- **mobile_navigation** : implementation of the controller (I/O FBL) and also of the service routine to adjust in front of the AR Marker (positioning_routine).
+- **logistic_task** : implementation of the mission in form of state machine. 
+
+
+## Dependecies
+
+- ROS Noetic
+- Catkin
+- RViz
+- Gazebo
+- [move_base]?
+- [aruco_ros](https://github.com/pal-robotics/aruco_ros) - Aruco libraries to read ARMarkers
+- 
+
+## Installation
+
+Clone the repository in the src folder of a catkin workspace. 
+
+```bash
+cd [workspace]/src
+git clone https://github.com/s-contento/TP.git
+cd ..
+catkin_make
+source devel/setup.bash
+```
+
+## Usage
+
+The mission is completed in 2 phases:
+
+- Phase 1: creation of the map with SLAM.
+
+For this task you have to load the models in the simulation scene and move the turtlebot in it thorugh the teleoperated package.
+
+```bash
+# launch world, gmapping, aruco and key_teleop packages
+roslaunch logistic_task phase1.launch
+```
+- Phase 2: localization and navigation.
+
+In this second phase the task is to localize the robot and start the logistic task that will bring the robot in the warehouse, search and read for the AR Marker and finally go to the desired room on the basis of the code on the Marker.
+
+```bash
+# launch world, amcl, aruco, planner, controller, logistic task package
+roslaunch logistic_task phase2.launch
+```
