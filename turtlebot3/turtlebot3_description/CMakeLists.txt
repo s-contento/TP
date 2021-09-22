@@ -4,13 +4,17 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(turtlebot3_description)
 
+add_compile_options(-std=c++17)
 ################################################################################
 # Find catkin packages and libraries for catkin and system dependencies
 ################################################################################
 find_package(catkin REQUIRED COMPONENTS
+  geometry_msgs
+  roscpp
+  rviz
+  tf
   urdf
   xacro
-  tf
 )
 
 ################################################################################
@@ -29,7 +33,7 @@ find_package(catkin REQUIRED COMPONENTS
 # Declare catkin specific configuration to be passed to dependent projects
 ################################################################################
 catkin_package(
-  CATKIN_DEPENDS urdf xacro tf
+#  CATKIN_DEPENDS urdf xacro tf
 )
 
 ################################################################################
@@ -42,14 +46,22 @@ include_directories(
 ################################################################################
 # Install
 ################################################################################
-install(DIRECTORY meshes rviz urdf
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
-)
+#install(DIRECTORY meshes rviz urdf
+#  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+#)
+
+include (FindPkgConfig)
+if (PKG_CONFIG_FOUND)
+	pkg_check_modules(GAZEBO gazebo)
+endif()
 
 
-add_executable(tf_listener src/tf_listener.cpp)
-target_link_libraries(tf_listener ${catkin_LIBRARIES} )
 
+include_directories(${GAZEBO_INCLUDE_DIRS})
+link_directories(${GAZEBO_LIBRARY_DIRS})
+
+add_library(controller_plug SHARED src/plugin/controller_plugin.cpp)
+target_link_libraries(controller_plug ${GAZEBO_LIBRARIES} ${Boost_LIBRARIES})
 ################################################################################
 # Test
 ################################################################################

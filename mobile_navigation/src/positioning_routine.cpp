@@ -32,32 +32,24 @@ POS_ROUTINE::POS_ROUTINE() {
 
     ist = 0;
 
-
-    // _path_obstacle = false;
-    // _human_mode = false;
-    // _fv = _rv = 0.0;
-    // _record_wp = false;
-
-    // _finish = false;
 }
 
 
 void POS_ROUTINE::vision_cb( aruco_msgs::MarkerArray markers ) {
 
-    if(markers.markers[0].id == current_id){
+    // if(markers.markers[0].id == current_id){
         relative_pose = markers.markers[0].pose.pose;
 
         tf::Quaternion q( relative_pose.orientation.x, relative_pose.orientation.y , relative_pose.orientation.z ,  relative_pose.orientation.w );
         tf::Matrix3x3(q).getRPY(roll, pitch, yaw);
 
-        //std::cout << "relative pose " << relative_pose.position.z;
 
         _first_lecture = true;
         _in_view = true;
-    }else{
-        _in_view = false;
+    // }else{
+    //     _in_view = false;
 
-    }
+    // }
 }
 
 
@@ -66,7 +58,7 @@ bool POS_ROUTINE::adjusting(){
     bool flag = false;
     geometry_msgs::Twist cmd;
 
-    if (relative_pose.position.z <= 1.5){
+    if (relative_pose.position.z <= 0.5){
 
         cmd.linear.x = -0.10;
 
@@ -105,7 +97,7 @@ bool POS_ROUTINE::positioning(){
     bool flag = false;
     geometry_msgs::Twist cmd;
 
-   std::cout << "xX : " << relative_pose.position.x<<endl;
+   std::cout << "X : " << relative_pose.position.x<<endl;
     if(fabs(relative_pose.position.x) >= 0.1){
         cmd.linear.x = 0.0;
         // cmd.linear.z = 0.0;
@@ -121,7 +113,7 @@ bool POS_ROUTINE::positioning(){
 
     }else{
 
-        if (relative_pose.position.z <= 1.5){
+        if (relative_pose.position.z <= 0.5){
 
         cmd.linear.x = -0.10;
 
@@ -347,21 +339,11 @@ bool POS_ROUTINE::service_callback( ros_service::service::Request &req, ros_serv
         ros::spinOnce();
     } 
     // req = request;
-    res.out.data = 1;
+    res.out.data = 0;
 
     return true;
 }
 
-// int main( int argc, char** argv ) {
-
-//     ros::init( argc, argv, "positioning_routine_node");
-
-//     POS_ROUTINE p_r;
-//     // p_r.run();
-
-
-//     return 0;
-// }
 int main(int argc, char **argv){
 
     ros::init( argc, argv, "positioning_routine_node");

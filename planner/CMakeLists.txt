@@ -10,7 +10,6 @@ set (CMAKE_CXX_FLAGS -O3)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  ackermann_msgs
   geometry_msgs
   nav_msgs
   roscpp
@@ -113,7 +112,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES rrt
-  CATKIN_DEPENDS ackermann_msgs geometry_msgs nav_msgs roscpp rospy sensor_msgs std_msgs visualization_msgs tf
+  CATKIN_DEPENDS geometry_msgs nav_msgs roscpp rospy sensor_msgs std_msgs visualization_msgs tf
 #  DEPENDS system_lib
 )
 

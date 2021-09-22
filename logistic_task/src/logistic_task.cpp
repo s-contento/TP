@@ -35,9 +35,9 @@
 using namespace std;
 
 //class to subscribe in /numbers and publish in /sum
-class ROS_SUB {
+class LOG_TASK {
     public:
-        ROS_SUB();
+        LOG_TASK();
         void run(); //<-- used to start all the parallel functions of my system
         void task_loop();
 
@@ -57,6 +57,8 @@ class ROS_SUB {
     private:
         ros::NodeHandle _nh;
 
+        geometry_msgs::Pose _w_goal;
+
         ros::Subscriber _topic_sub;
         ros::Publisher _topic_pub;
 
@@ -64,6 +66,7 @@ class ROS_SUB {
         ros::Subscriber _clk_p;
 
         ros::Publisher _goal_pub;
+        ros::Publisher _cmd_pub;
 
         ros::ServiceClient _client;
 
@@ -106,7 +109,7 @@ class ROS_SUB {
 
 };
 
-ROS_SUB::ROS_SUB() {
+LOG_TASK::LOG_TASK() {
 
     for(int i = 0; i <= N_ROOM; i++){
         _located[i]=false;
@@ -139,34 +142,35 @@ ROS_SUB::ROS_SUB() {
 
     _client = _nh.serviceClient<ros_service::service>("service");
 
-    _topic_pub = _nh.advertise<std_msgs::Int32>("/recognized_ID",10);
+    _topic_pub = _nh.advertise<geometry_msgs::Pose>("/visual_odom",0);
     _goal_pub = _nh.advertise<geometry_msgs::Pose>("/goals",0);
+    _cmd_pub = _nh.advertise<geometry_msgs::Twist>("/cmd_vel", 0);
 
     
-    _topic_sub = _nh.subscribe("/aruco_marker_publisher/markers", 1, &ROS_SUB::topic_cb, this);
-    _controller_result = _nh.subscribe("/controller_result", 1, &ROS_SUB::result_cb, this);
+    _topic_sub = _nh.subscribe("/aruco_marker_publisher/markers", 1, &LOG_TASK::topic_cb, this);
+    _controller_result = _nh.subscribe("/controller_result", 1, &LOG_TASK::result_cb, this);
 
-    _clk_p = _nh.subscribe("/clicked_point", 0, &ROS_SUB::clk_p_cb, this);
+    _clk_p = _nh.subscribe("/clicked_point", 0, &LOG_TASK::clk_p_cb, this);
 
     // ros::Rate rate(10);
 
 }
 
-void ROS_SUB::set_pos( geometry_msgs::Point p, int index){
+void LOG_TASK::set_pos( geometry_msgs::Point p, int index){
 
     _rooms[index] = p;
 
 }
-void ROS_SUB::get_pos( geometry_msgs::Point p, int index){
+void LOG_TASK::get_pos( geometry_msgs::Point p, int index){
     p = _rooms[index];
 }
 
 
-void ROS_SUB::clk_p_cb( geometry_msgs::PointStamped clk_p ){
+void LOG_TASK::clk_p_cb( geometry_msgs::PointStamped clk_p ){
 
     std::cout << "clicked";
 
-    geometry_msgs::Pose _w_goal;
+    // geometry_msgs::Pose _w_goal;
 
     _w_goal.position = clk_p.point;
     
@@ -176,7 +180,7 @@ void ROS_SUB::clk_p_cb( geometry_msgs::PointStamped clk_p ){
     changed = true;
 }
 
-void ROS_SUB::topic_cb( aruco_msgs::MarkerArray markers){
+void LOG_TASK::topic_cb( aruco_msgs::MarkerArray markers){
     if (state == 2){
         if((markers.markers[0].pose.pose.position.z <= 2) && (markers.markers[0].pose.pose.position.x <= 2) && (markers.markers[0].pose.pose.position.y <= 2))
         {
@@ -192,13 +196,43 @@ void ROS_SUB::topic_cb( aruco_msgs::MarkerArray markers){
     }
     if(state == 4){
 
-        if((markers.markers[0].pose.pose.position.z >= 2) || (markers.markers[0].pose.pose.position.x >= 2) || (markers.markers[0].pose.pose.position.y >= 2))
+        geometry_msgs::Twist cmd;
+
+        current_Id.data = markers.markers[0].id;
+
+
+        //if((markers.markers[0].pose.pose.position.z >= 2) || (markers.markers[0].pose.pose.position.x >= 2) || (markers.markers[0].pose.pose.position.y >= 2))
+        if((current_Id.data == 3))
         {
         //if controllo su posa relativa Ar Marker-Camera, in modo da non avere lettura troppo sbagliata
             ROS_INFO("\n\nMarker Lost!\n\n");
-            state = 5;
+
+
+             state = 5;
             changed = true;
+
+            cmd.linear.x = 0.0;
+            cmd.angular.z = 0.0;
+            _cmd_pub.publish(cmd);
+
+            //adjust odometry pose with info by the ar marker
+            // geometry_msgs::Pose vision_pose;
+
+            // vision_pose = markers.markers[0].pose.pose;
+            // _topic_pub.publish(vision_pose);
+
+
+           
         }
+        else{
+            
+            ROS_INFO("\n\nMarker Not Lost!\n\n");
+            // cmd.linear.x = 0.0;
+            // cmd.angular.z = 0.1;
+            // _cmd_pub.publish(cmd);
+
+        }
+
     }
     // else if(state == 4){
     //     cout << "\n\n GOAL REACHED! TASK CONCLUDED!\n";
@@ -208,7 +242,7 @@ void ROS_SUB::topic_cb( aruco_msgs::MarkerArray markers){
 
 }
 
-void ROS_SUB::result_cb( std_msgs::Int32 result){
+void LOG_TASK::result_cb( std_msgs::Int32 result){
 
     cout << "\n\n Result arrived : [" << result.data << "] ";
     
@@ -219,6 +253,12 @@ void ROS_SUB::result_cb( std_msgs::Int32 result){
             state = 8;
             changed = true;
             cout << "SUCCEEDED!\n";
+        }
+        else if (result.data == 2){
+            state = 0;
+            changed = true;
+            cout << "OBSTACLEEEEEEEE!\n";
+
         }
         else{
             state = 10;
@@ -253,10 +293,10 @@ void ROS_SUB::result_cb( std_msgs::Int32 result){
 }
 
 
-void ROS_SUB::take_input(){
+void LOG_TASK::take_input(){
 
-    int input;
-    geometry_msgs::Pose _w_goal;
+    int input = 10;
+    // geometry_msgs::Pose _w_goal;
 
 
     std::cout << "\n[0] : Start the logistic task.\n";
@@ -278,14 +318,14 @@ void ROS_SUB::take_input(){
                 _nh.getParam("r1_x",_w_goal.position.x);
             }
             else{
-                _w_goal.position.x = 3.0;
+                _w_goal.position.x = 1.0;
             }
             if (_nh.hasParam("r1_y"))
             {
                 _nh.getParam("r1_y",_w_goal.position.y);
             }
             else{
-                _w_goal.position.y = 4.0;
+                _w_goal.position.y = 2.0;
             }
 
             _w_goal.orientation.w = 1.0;
@@ -302,14 +342,14 @@ void ROS_SUB::take_input(){
                 _nh.getParam("r2_x",_w_goal.position.x);
             }
             else{
-                _w_goal.position.x = 3.0;
+                _w_goal.position.x = 4.0;
             }
             if (_nh.hasParam("r2_y"))
             {
                 _nh.getParam("r2_y",_w_goal.position.y);
             }
             else{
-                _w_goal.position.y = -4.0;
+                _w_goal.position.y = 2.0;
             }
 
             _w_goal.orientation.w = 1.0;
@@ -334,8 +374,8 @@ void ROS_SUB::take_input(){
 
 
 
-void ROS_SUB::task_loop() {
-    geometry_msgs::Pose _w_goal;
+void LOG_TASK::task_loop() {
+    // geometry_msgs::Pose _w_goal;
     ros_service::service srv;
     //         ros::Rate rate(10);
 
@@ -355,14 +395,14 @@ void ROS_SUB::task_loop() {
                     _nh.getParam("wh_x",_w_goal.position.x);
                 }
                 else{
-                    _w_goal.position.x = 8.0;
+                    _w_goal.position.x = 1.0;
                 }
                  if (_nh.hasParam("wh_y"))
                 {
                     _nh.getParam("wh_y",_w_goal.position.y);
                 }
                 else{
-                    _w_goal.position.y = -4.0;
+                    _w_goal.position.y = -1.3;
                 }
 
                 _w_goal.orientation.w = 1.0;
@@ -414,19 +454,19 @@ void ROS_SUB::task_loop() {
                         _nh.getParam("r1_x",_w_goal.position.x);
                     }
                     else{
-                        _w_goal.position.x = 3.0;
+                        _w_goal.position.x = 1.0;
                     }
                     if (_nh.hasParam("r1_y"))
                     {
                         _nh.getParam("r1_y",_w_goal.position.y);
                     }
                     else{
-                        _w_goal.position.y = 4.0;
+                        _w_goal.position.y = 2.0;
                     }
 
                     _w_goal.orientation.w = 1.0;
 
-                    _goal_pub.publish(_w_goal);
+                    // _goal_pub.publish(_w_goal);
 
                 }else if(current_Id.data == 2){
                     std::cout << "\n\n ROOM 2!\n";
@@ -439,26 +479,25 @@ void ROS_SUB::task_loop() {
                         _nh.getParam("r2_x",_w_goal.position.x);
                     }
                     else{
-                        _w_goal.position.x = 3.0;
+                        _w_goal.position.x = 4.0;
                     }
                     if (_nh.hasParam("r2_y"))
                     {
                         _nh.getParam("r2_y",_w_goal.position.y);
                     }
                     else{
-                        _w_goal.position.y = -4.0;
+                        _w_goal.position.y = 2.0;
                     }
 
                     _w_goal.orientation.w = 1.0;
 
-                    _goal_pub.publish(_w_goal);
+                    // _goal_pub.publish(_w_goal);
                 }
                 else{
                     cout << "\n\n UNDEFINED ID!";
                     state = 10;
                     changed = true;
                 }
-
 
                 break;
 
@@ -469,6 +508,18 @@ void ROS_SUB::task_loop() {
                 changed = false;
                 }
 
+                if (current_Id.data == 3){
+                    std::cout << "\n\n New marker found ...\n";
+                }else{
+                    geometry_msgs::Twist cmd;
+
+                    ROS_INFO("\n\nMarker Not Lost!\n\n");
+                    cmd.linear.x = 0.0;
+                    cmd.angular.z = 0.1;
+                    _cmd_pub.publish(cmd);
+
+                }
+
 
                 break;
 
@@ -476,6 +527,8 @@ void ROS_SUB::task_loop() {
 
                 if(changed){
                 std::cout << "\n\n Waiting for results ...\n";
+                _goal_pub.publish(_w_goal);
+
                 changed = false;
                 }
 
@@ -543,9 +596,9 @@ void ROS_SUB::task_loop() {
     
 }
 
-void ROS_SUB::run() {
+void LOG_TASK::run() {
 
-    boost::thread task_loop_t( &ROS_SUB::task_loop, this );
+    boost::thread task_loop_t( &LOG_TASK::task_loop, this );
     ros::spin();
     //---
 }
@@ -554,7 +607,7 @@ void ROS_SUB::run() {
 int main(int argc, char **argv){
     
     ros::init(argc,argv,"ar_marker_id");
-    ROS_SUB rs;
+    LOG_TASK rs;
 
     rs.run();
     return 0;

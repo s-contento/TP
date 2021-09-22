@@ -1,4 +1,3 @@
-#include <ackermann_msgs/AckermannDriveStamped.h>
 #include <geometry_msgs/Point.h>
 #include <geometry_msgs/PointStamped.h>
 #include <geometry_msgs/Pose.h>
@@ -25,7 +24,6 @@
 #include <random>
 #include <string>
 #include <vector>
-#include <queue>
 
 // enum type for the switch between RRT and RRT*
 enum RRT_type {
@@ -93,18 +91,6 @@ private:
     
     nav_msgs::OccupancyGrid grid;                           //Occupancy grid
 
-    // parameters of occupancy grid
-    unsigned int x_offset = 290;
-    unsigned int y_offset = 14;
-    unsigned int y_rr = 1;
-    unsigned int y_rl = 22;
-    unsigned int y_ll = 197;
-    unsigned int y_lr = 177;
-    unsigned int x_tt = 491;
-    unsigned int x_tb = 472;
-    unsigned int x_bb = 5;
-    unsigned int x_bt = 24;
-
     //flag received map and odom for goal and current pos
     bool c_pos_flag = false;
     bool c_map_flag = false;
@@ -135,23 +121,18 @@ private:
     // defines RRT type
     RRT_type rrt_type;
 
-    // function for control
-    double angle, heading_current;
-    void reactive_control();
-
-    // random generator, use this
+    // random generator
     std::mt19937 gen;
     std::uniform_real_distribution<> x_dist;
     std::uniform_real_distribution<> y_dist;
 
     // callbacks
-    // where rrt actually happens
     
     void goal_callback(geometry_msgs::Pose goal);
 
     void map_callback(const nav_msgs::OccupancyGrid occ_grid);
 
-    void pf_callback(const nav_msgs::Odometry &odometry_info);
+    void odom_callback(const nav_msgs::Odometry &odometry_info);
     // updates occupancy grid
     void scan_callback(const sensor_msgs::LaserScan &scan_msg);
 
@@ -162,10 +143,7 @@ private:
     bool check_collision(Node &nearest_node, Node &new_node);
     bool is_goal(Node &latest_added_node, double goal_x, double goal_y);
     std::vector<Node> find_path(std::vector<Node> &tree, Node &latest_added_node);
-    std::vector<Node> find_path_A_star(std::vector<Node> &tree, Node &latest_added_node);
+    std::vector<Node> find_path_A_star(std::vector<Node> &tree, Node &latest_added_node, int fin_index);
 
-    // RRT* methods
-    double cost(std::vector<Node> &tree, Node &node);
     double line_cost(Node &n1, Node &n2);
-    std::vector<int> near(std::vector<Node> &tree, Node &node);
 };

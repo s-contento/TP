@@ -57,7 +57,7 @@
     </sensor>
     <material>Gazebo/Grey</material>
   </gazebo>
-
+<!--
   <gazebo>
     <plugin name="turtlebot3_waffle_controller" filename="libgazebo_ros_diff_drive.so">
       <commandTopic>cmd_vel</commandTopic>
@@ -81,6 +81,29 @@
     </plugin>
   </gazebo>
 
+ -->
+
+  <gazebo>
+	<plugin name="libcontroller_plug" filename="libcontroller_plug.so">
+	<commandTopic>/cmd_vel</commandTopic>
+      	<odometryTopic>/odom</odometryTopic>
+        <odometryFrame>odom</odometryFrame>
+        <robotBaseFrame>base_footprint</robotBaseFrame>
+        <leftJoint>wheel_left_joint</leftJoint>
+        <rightJoint>wheel_right_joint</rightJoint>
+        <wheelSeparation>0.287</wheelSeparation>
+        <wheelDiameter>0.066</wheelDiameter>
+        <wheelTorque>10</wheelTorque>
+	<velocity>1</velocity>
+	
+	<useImu>0</useImu>
+	<imuTopic>/imu</imuTopic>
+	
+	</plugin>
+  </gazebo> 
+
+
+ 
   <gazebo>
     <plugin name="imu_plugin" filename="libgazebo_ros_imu.so">
       <alwaysOn>true</alwaysOn>

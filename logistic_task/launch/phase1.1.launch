@@ -4,6 +4,9 @@
 
   <!--<include file="$(find ar_marker_test)/launch/aruco.launch" /> -->
   
-  <include file="$(find turtlebot3_teleop)/launch/turtlebot3_teleop_key.launch" />
-
+  <!--<include file="$(find turtlebot3_teleop)/launch/turtlebot3_teleop_key.launch" />
+  
+  <node pkg="tf" type="static_transform_publisher" name="odom_map_broadcaster"
+     args="0 0 0 0 0 0 /odom /base_footprint 10" />
+-->
 </launch>

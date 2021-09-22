@@ -26,12 +26,6 @@ class POS_ROUTINE {
         void run(); //<-- used to start all the parallel functions of my system
         void ctrl_loop(); //<-- main loop function
 
-        // void odometry_cb( nav_msgs::Odometry odom );
-        // void laser_cb( std_msgs::Int32 laser );
-        // void plan_cb( nav_msgs::Path geom_path);
-
-        // bool service_callback( ros_service::service::Request &req, ros_service::service::Response &res);
-
 
         bool rotating();
         bool positioning();
@@ -60,7 +54,7 @@ class POS_ROUTINE {
         //id received from the publisher
         int current_id;
 
-        float aligned_pitch;
+        float aligned_pitch;            //relative pitch when the cart is pointing the AR
 
         //Publishers and Subscribers
     
@@ -84,18 +78,5 @@ class POS_ROUTINE {
         bool _in_view;
 
         bool _finish;
-
-
-        // bool _path_received;
-        // bool _first_odom;
-        // bool _path_obstacle;
-        // bool _human_mode;
-        // bool _record_wp;
-        // double _fv;
-        // double _rv;
-        // int _wp_index;
-
-        // bool _finish;
-
 
 };
