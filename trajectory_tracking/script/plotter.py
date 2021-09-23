@@ -6,6 +6,8 @@ from nav_msgs.msg import Odometry
 from geometry_msgs.msg import Pose2D
 from geometry_msgs.msg import Twist
 
+from geometry_msgs.msg import PoseWithCovarianceStamped
+
 # import Matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
@@ -84,8 +86,8 @@ def animate2(i):
     ax2.plot(s ,ye,'r' ,lw=2)  
     #ax2.plot(s ,th,'b',label=r'$\theta_e$' ,lw=2) 
 
-    vr.append(float(v))
-    wr.append(float(w))
+    vr.append(float(v/1000))
+    wr.append(float(w/1000))
 
     ax3.plot(s ,vr, 'k' ,lw=2)  
     ax3.plot(s ,wr, 'b' ,lw=2) 
@@ -100,7 +102,8 @@ if __name__ == '__main__':
 
     # initialization of ROS node
     rospy.init_node('back_cir', anonymous=True) #make node 
-    sub = rospy.Subscriber("/point_odom", Odometry, pose_callback, queue_size=1000)
+    #sub = rospy.Subscriber("/point_odom", Odometry, pose_callback, queue_size=1000)
+    sub = rospy.Subscriber("/amcl_pose", Odometry, pose_callback, queue_size=1000)
     sub1 = rospy.Subscriber("/desired_traj_pub", Pose2D, desired_callback, queue_size=1000)
     sub2 = rospy.Subscriber("/errors_pub", Pose2D, errors_callback, queue_size=1000)
 

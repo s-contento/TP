@@ -3,13 +3,14 @@
 using namespace std;
 
 
-#define LIN_VEL 1
-#define ANG_VEL 1
+#define LIN_VEL 0.1
+#define ANG_VEL 0.1
 
 double t;
 
 NAVIGATION::NAVIGATION() {
-    _odom_sub  = _nh.subscribe("/odom", 1, &NAVIGATION::odometry_cb, this); //receive odometry
+    // _odom_sub  = _nh.subscribe("/odom", 1, &NAVIGATION::odometry_cb, this); //receive odometry (dead reckoning)
+     _odom_sub  = _nh.subscribe("/amcl_pose", 1, &NAVIGATION::odometry_cb, this); //receive odometry (from AMCL)
     _planner_sub = _nh.subscribe("/path", 1, &NAVIGATION::plan_cb, this);   //receive the path from the planner
 
     _lidar_sub = _nh.subscribe("/scan", 1, &NAVIGATION::laser_cb, this);
@@ -41,7 +42,7 @@ NAVIGATION::NAVIGATION() {
         _nh.getParam("k1",k[0]);
     }
     else{
-        k[0] = 1.5;
+        k[0] = 0.1;
     }
 
     if (_nh.hasParam("k2"))
@@ -49,7 +50,7 @@ NAVIGATION::NAVIGATION() {
         _nh.getParam("k2",k[1]);
     }
     else{
-        k[1] = 0.2;
+        k[1] = 0.1;
     }
 
     if (_nh.hasParam("b"))
@@ -166,7 +167,9 @@ void NAVIGATION::laser_cb( sensor_msgs::LaserScan laser ) {
 }
 
 
-void NAVIGATION::odometry_cb( nav_msgs::Odometry odom ) {
+// void NAVIGATION::odometry_cb( nav_msgs::Odometry odom ) {
+void NAVIGATION::odometry_cb(geometry_msgs::PoseWithCovarianceStamped odom ) {
+
 
     _curr_p.x = odom.pose.pose.position.x;
     _curr_p.y = odom.pose.pose.position.y;
@@ -189,7 +192,7 @@ void NAVIGATION::odometry_cb( nav_msgs::Odometry odom ) {
     _first_odom = true;
 
 
-    point_odom = odom;
+    //point_odom = odom;
     point_odom.pose.pose.position.x = _B_p.x;
     point_odom.pose.pose.position.y = _B_p.y;
     point_odom.pose.pose.position.z = _B_p.z;
@@ -281,11 +284,11 @@ void NAVIGATION::fake_path_cb( std_msgs::Int32 fake_value ) {
 
     // path.poses.push_back( p );
 
-    cout << "\nOKOK\n";
+    // cout << "\nOKOK\n";
 
-    for (int i = 0; i< path.poses.size();i++){
-            cout << "\nPOINT [" << i << "] X:" << path.poses[i].pose.position.x;
-    }
+    // for (int i = 0; i< path.poses.size();i++){
+    //         cout << "\nPOINT [" << i << "] X:" << path.poses[i].pose.position.x;
+    // }
 
     _test_pub.publish(path);
     // int start_ind = int( ((90 - 20) / 180.0*M_PI)  / laser.angle_increment );  //
@@ -483,12 +486,13 @@ bool NAVIGATION::navigation( float x_r, float y_r, float x_r_d, float y_r_d ) {
 
 
     // if( pos_e < 0.1 ) {
-    if( (t >= norma/scaling_factor) || (pos_e < 0.01)) {
+    if( (t >= norma/scaling_factor) || (pos_e < 0.1)) {
 
         if(_wp_index == _wp_list.size()-2){
             cmd.linear.x = 0.0;
             cmd.angular.z = 0.0;
             _cmd_vel_pub.publish( cmd );
+
         }
         //cout << "\ne < 0.1!\n";
         

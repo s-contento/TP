@@ -58,7 +58,7 @@ bool POS_ROUTINE::adjusting(){
     bool flag = false;
     geometry_msgs::Twist cmd;
 
-    if (relative_pose.position.z <= 0.5){
+    if (relative_pose.position.z <= 1.5){
 
         cmd.linear.x = -0.10;
 
@@ -113,7 +113,7 @@ bool POS_ROUTINE::positioning(){
 
     }else{
 
-        if (relative_pose.position.z <= 0.5){
+        if (relative_pose.position.z <= 1.5){
 
         cmd.linear.x = -0.10;
 

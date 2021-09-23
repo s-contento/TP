@@ -7,8 +7,8 @@
 #define KP 1.00
 #define PI 3.1415927
 #define ETA 0.60
-#define MAX_ITERATION 10000
-#define INFLATION_RADIUS 4
+#define MAX_ITERATION 100000
+#define INFLATION_RADIUS 5
 
 
 std::vector<unsigned int> convert_frame(double x_global, double y_global, double x_off = -10.00, double y_off = -10.00) {

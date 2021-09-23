@@ -161,7 +161,7 @@ include_directories(
 add_executable(ar_listener src/ar_listener.cpp)
 target_link_libraries(ar_listener ${catkin_LIBRARIES})
 
-
+add_dependencies(ar_listener aruco_ros ${catkin_EXPORTED_TARGETS})
 # all install targets should use catkin DESTINATION variables
 # See http://ros.org/doc/api/catkin/html/adv_user_guide/variables.html
 

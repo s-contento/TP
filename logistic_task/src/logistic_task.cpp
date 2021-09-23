@@ -202,18 +202,17 @@ void LOG_TASK::topic_cb( aruco_msgs::MarkerArray markers){
 
 
         //if((markers.markers[0].pose.pose.position.z >= 2) || (markers.markers[0].pose.pose.position.x >= 2) || (markers.markers[0].pose.pose.position.y >= 2))
-        if((current_Id.data == 3))
+        if((current_Id.data == 3)&&(markers.markers[0].pose.pose.position.x <= 0.05))
         {
         //if controllo su posa relativa Ar Marker-Camera, in modo da non avere lettura troppo sbagliata
             ROS_INFO("\n\nMarker Lost!\n\n");
 
-
-             state = 5;
-            changed = true;
-
             cmd.linear.x = 0.0;
             cmd.angular.z = 0.0;
             _cmd_pub.publish(cmd);
+
+            state = 5;
+            changed = true;
 
             //adjust odometry pose with info by the ar marker
             // geometry_msgs::Pose vision_pose;

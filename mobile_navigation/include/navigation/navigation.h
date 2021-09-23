@@ -3,6 +3,9 @@
 //---Input
 #include "geometry_msgs/Twist.h" //<-- to control the robot in velocity
 #include "nav_msgs/Odometry.h" //<-- to read the current position of the robot
+#include "geometry_msgs/PoseWithCovarianceStamped.h" //<-- to read the current position of the robot
+
+
 #include "sensor_msgs/LaserScan.h" //<-- to read the 2d Lidar
 #include "nav_msgs/Path.h"
 #include "std_msgs/Int32.h"
@@ -24,7 +27,9 @@ class NAVIGATION {
         void run(); //<-- used to start all the parallel functions of my system
         void ctrl_loop(); //<-- main loop function
 
-        void odometry_cb( nav_msgs::Odometry odom );
+        // void odometry_cb( nav_msgs::Odometry odom );
+        void odometry_cb( geometry_msgs::PoseWithCovarianceStamped odom );
+
         void fake_path_cb( std_msgs::Int32 fake_value );
         void plan_cb( nav_msgs::Path geom_path);
         void laser_cb( sensor_msgs::LaserScan geom_path);
