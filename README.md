@@ -14,7 +14,7 @@ In the second phase it's used to read the AR Markers ID.
 - **planner** : implementation of RRT with A*.
 - **mobile_navigation** : implementation of the controller (I/O FBL) and also of the service routine to adjust in front of the AR Marker (positioning_routine).
 - **logistic_task** : implementation of the mission in form of state machine. 
-
+- **trajectory_tracking** : launch a python script to plot the desired variables.
 
 ## Dependecies
 
