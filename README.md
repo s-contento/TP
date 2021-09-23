@@ -60,5 +60,6 @@ In this second phase the task is to localize the robot and start the logistic ta
 ```bash
 # launch world, amcl, aruco, planner, controller, logistic task package
 roslaunch logistic_task phase2.launch
-```![ezgif com-gif-maker (1)](https://user-images.githubusercontent.com/80551374/134597379-1a2a2a68-69d8-4faf-bae1-c058e35f9227.gif)
+```
+![ezgif com-gif-maker (1)](https://user-images.githubusercontent.com/80551374/134597379-1a2a2a68-69d8-4faf-bae1-c058e35f9227.gif)
 
