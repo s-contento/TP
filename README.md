@@ -46,10 +46,13 @@ The mission is completed in 2 phases:
 
 For this task you have to load the models in the simulation scene and move the turtlebot in it thorugh the teleoperated package.
 
+
 ```bash
 # launch world, gmapping, aruco and key_teleop packages
 roslaunch logistic_task phase1.launch
 ```
+
+![ezgif com-gif-maker](https://user-images.githubusercontent.com/80551374/134597249-642f732e-9f43-440e-9aba-7000d07ad754.gif)
 - Phase 2: localization and navigation.
 
 In this second phase the task is to localize the robot and start the logistic task that will bring the robot in the warehouse, search and read for the AR Marker and finally go to the desired room on the basis of the code on the Marker.
@@ -57,4 +60,5 @@ In this second phase the task is to localize the robot and start the logistic ta
 ```bash
 # launch world, amcl, aruco, planner, controller, logistic task package
 roslaunch logistic_task phase2.launch
-```
+```![ezgif com-gif-maker (1)](https://user-images.githubusercontent.com/80551374/134597379-1a2a2a68-69d8-4faf-bae1-c058e35f9227.gif)
+
