@@ -1,12 +1,15 @@
-# Topics that RRT listens to
-# TODO: add your own
-# TODO: change this to the pose topic published particle filter
-k1: 10
-k2: 10
+#controller I/O FBL 
+k1: 0.1
+k2: 0.1
 b: 0.3
 
-# Topics that RRT publishes to
-# TODO: add your own
-# visualization
+#velocity saturations
+lin_sat: 0.1
+ang_sat: 0.2
 
-# TODO: add Parameters for RRT
+#trajectory scale factor
+scale: 0.05
+
+#laser scan proximity threshold
+laser_th: 0.15
+

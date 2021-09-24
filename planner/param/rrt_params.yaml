@@ -1,0 +1,7 @@
+
+#pose_topic: "some_pose_topic"
+#scan_topic: "some_scan_topic"
+
+inflation_radius: 5
+max_iter: 100000
+steer_length: 0.5

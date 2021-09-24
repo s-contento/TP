@@ -146,4 +146,10 @@ private:
     std::vector<Node> find_path_A_star(std::vector<Node> &tree, Node &latest_added_node, int fin_index);
 
     double line_cost(Node &n1, Node &n2);
+
+
+    //Parameters
+    float steer_length;
+    int max_iteration;
+    float inflation_radius;
 };

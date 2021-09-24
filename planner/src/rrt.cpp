@@ -4,9 +4,6 @@
 #define STEER_LENGTH 0.50
 #define TERMINATE_LENGTH 0.70
 #define LOOKAHEAD_DISTANCE 0.80
-#define KP 1.00
-#define PI 3.1415927
-#define ETA 0.60
 #define MAX_ITERATION 100000
 #define INFLATION_RADIUS 5
 
@@ -65,6 +62,31 @@ RRT::RRT(ros::NodeHandle &nh, RRT_type rrt_Type) : nh_(nh), gen((std::random_dev
     occupancy_grids_prior = std::vector<std::vector<bool>>(384, std::vector<bool>(384, true));
     
     occupancy_grids = occupancy_grids_prior;
+
+    if (nh_.hasParam("steer_length"))
+    {
+        nh_.getParam("steer_length",steer_length);
+    }
+    else{
+        steer_length = STEER_LENGTH;
+    }
+
+    if (nh_.hasParam("max_iter"))
+    {
+        nh_.getParam("max_iter",max_iteration);
+    }
+    else{
+        max_iteration = MAX_ITERATION;
+    }
+
+    if (nh_.hasParam("inflation_radius"))
+    {
+        nh_.getParam("inflation_radius",inflation_radius);
+    }
+    else{
+        inflation_radius = INFLATION_RADIUS;
+    }
+
     ROS_INFO("Created new RRT Object.\n");
 }
 
@@ -131,12 +153,12 @@ void RRT::map_callback(const nav_msgs::OccupancyGrid occ_grid) {
 
                 obstacles.push_back(p);
 
-                for (int d = 0; d<(2*INFLATION_RADIUS);d++){
+                for (int d = 0; d<(2*inflation_radius);d++){
 
-                    for (int h = 0; h< (2*INFLATION_RADIUS); h++){
+                    for (int h = 0; h< (2*inflation_radius); h++){
 
-                        pp.x = p.x + (h-INFLATION_RADIUS)*occ_grid.info.resolution + occ_grid.info.resolution / 2;
-                        pp.y = p.y + (d-INFLATION_RADIUS)*occ_grid.info.resolution + occ_grid.info.resolution / 2;
+                        pp.x = p.x + (h-inflation_radius)*occ_grid.info.resolution + occ_grid.info.resolution / 2;
+                        pp.y = p.y + (d-inflation_radius)*occ_grid.info.resolution + occ_grid.info.resolution / 2;
                         obstacles.push_back(pp);
 
             
@@ -247,7 +269,7 @@ void RRT::goal_callback(geometry_msgs::Pose goal) {
 
     int fin_index = 0;
     // each loop creates a new sample in the space, generate up to MAX_ITERATION samples due to on-board computation constraints
-    for (unsigned int i = 0; i < MAX_ITERATION; i++) {
+    for (unsigned int i = 0; i < max_iteration; i++) {
         std::vector<double> sampled_point = sample();               // sample the free space
         unsigned int nearest_point = nearest(tree, sampled_point);  // get the tree's nearest point
         Node new_node = steer(tree[nearest_point], sampled_point);  // steer the tree toward the sampled point, get new point
@@ -448,8 +470,8 @@ Node RRT::steer(Node &nearest_node, std::vector<double> &sampled_point) {
 
     Node new_node;
     double act_distance = std::sqrt(std::pow((nearest_node.x - sampled_point[0]), 2) + std::pow((nearest_node.y - sampled_point[1]), 2));
-    new_node.x = nearest_node.x + STEER_LENGTH / act_distance * (sampled_point[0] - nearest_node.x);
-    new_node.y = nearest_node.y + STEER_LENGTH / act_distance * (sampled_point[1] - nearest_node.y);
+    new_node.x = nearest_node.x + steer_length / act_distance * (sampled_point[0] - nearest_node.x);
+    new_node.y = nearest_node.y + steer_length / act_distance * (sampled_point[1] - nearest_node.y);
         
     return new_node;
 }
@@ -480,11 +502,11 @@ bool RRT::check_collision(Node &nearest_node, Node &new_node) {
             collision = true;
         }
 
-        for (int d = 0; d<(2*INFLATION_RADIUS);d++){
+        for (int d = 0; d<(2*inflation_radius);d++){
 
-            for (int h = 0; h< (2*INFLATION_RADIUS); h++){
+            for (int h = 0; h< (2*inflation_radius); h++){
 
-                if (grid.data[((grid_y-INFLATION_RADIUS+d)*grid.info.width) + (grid_x-INFLATION_RADIUS+h)] >= 1){
+                if (grid.data[((grid_y-inflation_radius+d)*grid.info.width) + (grid_x-inflation_radius+h)] >= 1){
                 collision = true;
 
                 }
