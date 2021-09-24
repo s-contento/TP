@@ -7,7 +7,7 @@
 
 #include "boost/thread.hpp"
 
-#include"ros_service/service.h"
+#include"logistic_task/service.h"
 
 
 
@@ -140,7 +140,7 @@ LOG_TASK::LOG_TASK() {
 
     manual = false;
 
-    _client = _nh.serviceClient<ros_service::service>("service");
+    _client = _nh.serviceClient<logistic_task::service>("service");
 
     _topic_pub = _nh.advertise<geometry_msgs::Pose>("/visual_odom",0);
     _goal_pub = _nh.advertise<geometry_msgs::Pose>("/goals",0);
@@ -375,7 +375,7 @@ void LOG_TASK::take_input(){
 
 void LOG_TASK::task_loop() {
     // geometry_msgs::Pose _w_goal;
-    ros_service::service srv;
+    logistic_task::service srv;
     //         ros::Rate rate(10);
 
     // rate.sleep();

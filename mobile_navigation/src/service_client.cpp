@@ -1,5 +1,5 @@
 #include"ros/ros.h"
-#include"ros_service/service.h"
+#include"mobile_navigation/service.h"
 #include<sstream>
 #include<iostream>
 #include<string>
@@ -12,7 +12,7 @@ int main(int argc, char **argv){
     ros::NodeHandle nh;
     ros::Rate loop_rate(10);
 
-    ros::ServiceClient client = nh.serviceClient<ros_service::service>("service");
+    ros::ServiceClient client = nh.serviceClient<mobile_navigation::service>("service");
 
     cout << "\nInserire indice iniziale \n('0' per uscire): \n";
     int parola = 0;
@@ -23,7 +23,7 @@ int main(int argc, char **argv){
             break;
         }
 
-        ros_service::service srv;
+        mobile_navigation::service srv;
 
         srv.request.in.data = parola;
         if(client.call(srv)){

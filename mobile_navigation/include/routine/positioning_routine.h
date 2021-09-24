@@ -1,5 +1,5 @@
 #include "ros/ros.h"
-#include"ros_service/service.h"
+#include"mobile_navigation/service.h"
 
 //---Input
 #include "geometry_msgs/Twist.h" //<-- to control the robot in velocity
@@ -38,7 +38,7 @@ class POS_ROUTINE {
         //callback to retrieve the aruco pose
         void vision_cb( aruco_msgs::MarkerArray markers);
 
-        bool service_callback(ros_service::service::Request &req, ros_service::service::Response &res);
+        bool service_callback(mobile_navigation::service::Request &req, mobile_navigation::service::Response &res);
 
     
     private:
@@ -67,8 +67,8 @@ class POS_ROUTINE {
 
         ros::ServiceServer _service; 
 
-        ros_service::service::Request request;
-        ros_service::service::Response response;
+        mobile_navigation::service::Request request;
+        mobile_navigation::service::Response response;
 
         //Service for AR positioning routine
         // ros::ServiceServer _service;

@@ -325,7 +325,7 @@ void POS_ROUTINE::run() {
     std::cout <<"\nafter spin\n";
 }
 
-bool POS_ROUTINE::service_callback( ros_service::service::Request &req, ros_service::service::Response &res){
+bool POS_ROUTINE::service_callback( mobile_navigation::service::Request &req, mobile_navigation::service::Response &res){
     std::cout <<"\nbefore run\n";
     
     

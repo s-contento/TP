@@ -149,6 +149,10 @@ target_link_libraries(positioning_routine  ${catkin_LIBRARIES} )
 add_executable( service_client src/service_client.cpp)
 target_link_libraries(service_client  ${catkin_LIBRARIES} )
 
+
+add_dependencies(mobile_navigation mobile_navigation_gencpp ${catkin_EXPORTED_TARGETS})
+add_dependencies(positioning_routine mobile_navigation_gencpp ${catkin_EXPORTED_TARGETS})
+add_dependencies(service_client mobile_navigation_gencpp ${catkin_EXPORTED_TARGETS})
 #add_executable(service_server src/service_server.cpp)
 #target_link_libraries(service_server ${catkin_LIBRARIES})
 

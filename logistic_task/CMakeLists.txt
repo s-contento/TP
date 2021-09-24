@@ -165,7 +165,7 @@ include_directories(
 add_executable(logistic_task src/logistic_task.cpp)
 target_link_libraries(logistic_task ${catkin_LIBRARIES})
 
-
+add_dependencies(logistic_task logistic_task_gencpp)
 # all install targets should use catkin DESTINATION variables
 # See http://ros.org/doc/api/catkin/html/adv_user_guide/variables.html
 
