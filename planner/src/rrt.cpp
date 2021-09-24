@@ -1,7 +1,7 @@
 #include "rrt/rrt.h"
 
 // define parameters here
-#define STEER_LENGTH 0.70
+#define STEER_LENGTH 0.40
 #define TERMINATE_LENGTH 0.80
 #define LOOKAHEAD_DISTANCE 0.80
 #define KP 1.00

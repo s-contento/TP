@@ -9,8 +9,8 @@
   <include file="$(find turtlebot3_navigation)/launch/turtlebot3_navigation.launch"/>
 
 
-  <node name="rrt_node" pkg="planner" type="rrt_node" output="screen" launch-prefix="xterm -e" />
-  <node name="mobile_navigation" pkg="mobile_navigation" type="mobile_navigation" output="screen" launch-prefix="xterm -e" />
+  <node name="rrt_node" pkg="planner" type="rrt_node" />
+  <node name="mobile_navigation" pkg="mobile_navigation" type="mobile_navigation"/>
   <node name="logistic_task" pkg="logistic_task" type="logistic_task" output="screen" launch-prefix="xterm -e" />
  <!--
   <node pkg="tf" type="static_transform_publisher" name="odom_to_map"
