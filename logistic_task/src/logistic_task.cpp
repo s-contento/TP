@@ -211,6 +211,8 @@ void LOG_TASK::topic_cb( aruco_msgs::MarkerArray markers){
             cmd.angular.z = 0.0;
             _cmd_pub.publish(cmd);
 
+            _goal_pub.publish(_w_goal);
+
             state = 5;
             changed = true;
 
@@ -509,6 +511,8 @@ void LOG_TASK::task_loop() {
 
                 if (current_Id.data == 3){
                     std::cout << "\n\n New marker found ...\n";
+
+                    
                 }else{
                     geometry_msgs::Twist cmd;
 
@@ -526,7 +530,7 @@ void LOG_TASK::task_loop() {
 
                 if(changed){
                 std::cout << "\n\n Waiting for results ...\n";
-                _goal_pub.publish(_w_goal);
+                // _goal_pub.publish(_w_goal);
 
                 changed = false;
                 }

@@ -1,8 +1,8 @@
 #include "rrt/rrt.h"
 
 // define parameters here
-#define STEER_LENGTH 0.40
-#define TERMINATE_LENGTH 0.80
+#define STEER_LENGTH 0.50
+#define TERMINATE_LENGTH 0.70
 #define LOOKAHEAD_DISTANCE 0.80
 #define KP 1.00
 #define PI 3.1415927
@@ -670,6 +670,7 @@ std::vector<Node> RRT::find_path_A_star(std::vector<Node> &tree, Node &latest_ad
     points.y = y_goal;
     points.z = 0.0;
     marker_4.points.push_back(points);
+    
     points.x = latest_added_node.x;
     points.y = latest_added_node.y;
     points.z = 0.0;
@@ -679,7 +680,12 @@ std::vector<Node> RRT::find_path_A_star(std::vector<Node> &tree, Node &latest_ad
     found_path.push_back(tree[q_g_index]);
     Node next_node = tree[tree[q_g_index].parent];
 
-    std::cout << "\n\first parent x,y"<< tree[tree[q_g_index].parent].x<< "  " << tree[tree[q_g_index].parent].y<<"\n\n";
+    points.x = next_node.x;
+    points.y = next_node.y;
+    points.z = 0.0;
+    marker_4.points.push_back(points);
+
+    //std::cout << "\n\first parent x,y"<< tree[tree[q_g_index].parent].x<< "  " << tree[tree[q_g_index].parent].y<<"\n\n";
 
     while (!next_node.is_root) {
         found_path.push_back(next_node);
