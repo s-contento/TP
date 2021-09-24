@@ -6,6 +6,7 @@ The assigned [project 1](https://prisma.dieti.unina.it/images/Courses/FSR/FSR-RL
 
 ## Brief Packages Description
 
+- **material** : contains the report, images and videos of the project.
 - **turtlebot3** : contains the packages used for the robot description (URDF) together with other packages that implements SLAM (gmapping), localization (amcl) and the joystick simulation (teleop).
 - **turtlebot3_simulations**: contains the stuff needed for the simulation of both the robot and the environment in gazebo.
 - **ar_marker_test** and **aruco_ros** : are used to work with Aruco AR Marker. 
