@@ -22,9 +22,11 @@ In the second phase it's used to read the AR Markers ID.
 - Catkin
 - RViz
 - Gazebo
-- [move_base]?
+- Eigen
+- gmapping
+- amcl
+- Turtlebot3
 - [aruco_ros](https://github.com/pal-robotics/aruco_ros) - Aruco libraries to read ARMarkers
-- 
 
 ## Installation
 
