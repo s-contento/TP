@@ -2,7 +2,7 @@
 
 This repository contains the implementation of the technical projects for the courses of Robotics Lab (RL) and Field and Service Robotics (FSR) for the academic year 2021.
 
-The assigned [project 1](https://prisma.dieti.unina.it/images/Courses/FSR/FSR-RL-TP-Assignments.pdf) required to develop a control system for a wheeled mobile robot used in a logistic environment.
+The assigned [project 1](https://github.com/s-contento/TP/tree/main/material/FSR-RL%20-%20TP%20Assignments%20(1).pdf) required to develop a control system for a wheeled mobile robot used in a logistic environment.
 
 ## Brief Packages Description
 
